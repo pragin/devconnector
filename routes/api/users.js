@@ -13,7 +13,7 @@ const User = require("../../models/User");
 router.get("/test", (req, res) => res.json({ msg: "users works" }));
 
 // @route    Post api/users/register
-// @desc     Tests users route
+// @desc     USer registration route
 // @access   Public
 
 router.post("/register", (req, res) => {
@@ -49,6 +49,36 @@ router.post("/register", (req, res) => {
       });
     }
   });
+});
+
+// @route    Post api/users/login
+// @desc     login route
+// @access   Public
+
+router.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  User.findOne({ email })
+    .then(user => {
+      //check if the user email is valid
+      if (!user) {
+        return res.status(404).json({ email: "User not found" });
+      }
+
+      //Check if the password match
+      bcrypt
+        .compare(password, user.password)
+        .then(isMatch => {
+          if (isMatch) {
+            res.json({ msg: "Success" });
+          } else {
+            return res.status(404).json({ password: "Password incorrect" });
+          }
+        })
+        .catch(err => console.log("error"));
+    })
+    .catch(err => res.json({ error: "Error" }));
 });
 
 module.exports = router;
