@@ -9,6 +9,9 @@ const passport = require("passport");
 // Load User model
 const User = require("../../models/User");
 
+//Load registration-validator
+const validateRegisterInput = require("../../validation/registration-validatior");
+
 // @route    GET api/users/test
 // @desc     Tests users route
 // @access   Public
@@ -20,9 +23,16 @@ router.get("/test", (req, res) => res.json({ msg: "users works" }));
 // @access   Public
 
 router.post("/register", (req, res) => {
+  const { errors, isValid } = validateRegisterInput(req.body);
+
+  if (!isValid) {
+    return res.status(404).json(errors);
+  }
+
   User.findOne({ email: req.body.email }).then(user => {
     if (user) {
-      res.status(404).json({ email: "Email already exists" });
+      errors.email = "Email already exists";
+      res.status(404).json(errors);
     } else {
       //create an avatar
       const avatar = gravatar.url(req.body.email, {
@@ -41,7 +51,7 @@ router.post("/register", (req, res) => {
       bcrypt.genSalt(10, (err, salt) => {
         if (err) throw err;
         bcrypt.hash(newUser.password, salt, (err, hash) => {
-          if (err) throw err;
+          //if (err) throw err;
           newUser.password = hash;
 
           newUser
