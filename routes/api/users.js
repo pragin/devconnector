@@ -125,7 +125,7 @@ router.post("/login", (req, res) => {
 // @access   Private
 
 router.get(
-  "/profile",
+  "/current",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     res.json({
